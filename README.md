@@ -20,6 +20,10 @@ A Telegram bot that tracks repost exchanges in group topics. Users post reel lin
 | `/stats` | View your personal stats | Private (DM) |
 | `/leaderboard` | View top 10 users by points | Private (DM) |
 | `/setweight @user 1.5` | Set user's weight (admin only) | Private (DM) |
+| `/setup` | Enable bot for this chat + sync admins | Public (group) |
+| `/syncadmins` | Re-sync admins from Telegram | Public (group) |
+| `/settopic <id>` | Restrict tracking to one topic (admin only) | Public (group) |
+| `/cleartopic` | Allow tracking in all topics (admin only) | Public (group) |
 
 ## Deployment on Railway
 
@@ -49,10 +53,12 @@ Click on your service (not the database) and go to **"Variables"** tab. Add:
 |----------|-------|-------------|
 | `BOT_TOKEN` | `your_bot_token` | From BotFather |
 | `DATABASE_URL` | `${{Postgres.DATABASE_URL}}` | Reference to Postgres (auto-filled) |
-| `ADMIN_IDS` | `123456789,987654321` | Comma-separated Telegram user IDs |
 | `HASHTAG` | `#repost` | Hashtag to track (optional, default: #repost) |
 | `REACTION_EMOJI` | `👍` | Emoji to track (optional, default: 👍) |
-| `TOPIC_ID` | `123` | Specific topic ID to monitor (optional) |
+
+Notes:
+- `ADMIN_IDS` is no longer used. Admins are synced per-chat from Telegram via `/setup` and `/syncadmins`.
+- Topic restriction is configured per chat via `/settopic` (or auto-set to the current topic if you run `/setup` inside a topic).
 
 ### Step 4: Run Database Migrations
 
@@ -70,25 +76,26 @@ Click on your service (not the database) and go to **"Variables"** tab. Add:
 
 Or use Railway's shell feature:
 1. Click **"Settings"** → **"Railway Shell"**
-2. Run: `alembic upgrade head`
+2. Run: `/opt/venv/bin/python -m alembic upgrade head`
 
 ### Step 5: Verify Deployment
 
 1. Check the **"Deployments"** tab for successful deployment
 2. View **"Logs"** to see "Starting bot..."
 3. Test the bot in your Telegram group
+4. In each group where you add the bot, run `/setup` once (must be a Telegram chat admin)
 
 ## Getting Your Telegram User ID
 
-To set yourself as admin, you need your Telegram user ID:
+You may still need your Telegram user ID for debugging, but the bot no longer uses a global admin list. Admins are synced per chat from Telegram.
 
 1. Start a chat with [@userinfobot](https://t.me/userinfobot)
 2. It will reply with your user ID
-3. Add this ID to `ADMIN_IDS`
+3. No need to add it anywhere — admins are synced per chat from Telegram using `/setup` and `/syncadmins`
 
 ## Getting Topic ID
 
-If you want to restrict the bot to a specific topic:
+If you want to restrict the bot to a specific topic in a group with topics:
 
 1. Right-click on a message in the topic
 2. Select "Copy Message Link"
@@ -114,7 +121,6 @@ pip install -r requirements.txt
 # Set environment variables
 export BOT_TOKEN="your_bot_token"
 export DATABASE_URL="postgresql://user:pass@localhost:5432/repost_bot"
-export ADMIN_IDS="your_telegram_id"
 
 # Run migrations
 alembic upgrade head
@@ -189,7 +195,7 @@ When B reacts to A's post:
 
 ### Bot doesn't respond to messages
 - Ensure the bot is added to the group as admin
-- Check if `TOPIC_ID` is set correctly (if using topics)
+- If you restricted the bot to a topic, verify it with `/settopic` / `/cleartopic`
 - Verify the hashtag matches (case-insensitive)
 
 ### Can't receive DMs

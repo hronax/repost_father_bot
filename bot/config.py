@@ -6,10 +6,8 @@ from dataclasses import dataclass
 class Config:
     bot_token: str
     database_url: str
-    hashtag: str
-    reaction_emoji: str
-    admin_ids: list[int]
-    topic_id: int | None
+    default_hashtag: str
+    default_reaction_emoji: str
 
     @classmethod
     def from_env(cls) -> "Config":
@@ -25,22 +23,14 @@ class Config:
         if database_url.startswith("postgres://"):
             database_url = database_url.replace("postgres://", "postgresql://", 1)
 
-        hashtag = os.environ.get("HASHTAG", "#repost")
-        reaction_emoji = os.environ.get("REACTION_EMOJI", "👍")
-
-        admin_ids_str = os.environ.get("ADMIN_IDS", "")
-        admin_ids = [int(id.strip()) for id in admin_ids_str.split(",") if id.strip()]
-
-        topic_id_str = os.environ.get("TOPIC_ID")
-        topic_id = int(topic_id_str) if topic_id_str else None
+        default_hashtag = os.environ.get("HASHTAG", "#repost")
+        default_reaction_emoji = os.environ.get("REACTION_EMOJI", "👍")
 
         return cls(
             bot_token=bot_token,
             database_url=database_url,
-            hashtag=hashtag,
-            reaction_emoji=reaction_emoji,
-            admin_ids=admin_ids,
-            topic_id=topic_id,
+            default_hashtag=default_hashtag,
+            default_reaction_emoji=default_reaction_emoji,
         )
 
 

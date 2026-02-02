@@ -9,7 +9,15 @@ from telegram.ext import (
 )
 
 from bot.config import get_config
-from bot.handlers.commands import leaderboard_command, setweight_command, stats_command
+from bot.handlers.commands import (
+    cleartopic_command,
+    leaderboard_command,
+    settopic_command,
+    setweight_command,
+    setup_command,
+    stats_command,
+    syncadmins_command,
+)
 from bot.handlers.message import handle_hashtag_message
 from bot.handlers.reaction import handle_reaction
 from db.database import close_db, init_db
@@ -49,6 +57,10 @@ def main() -> None:
     application.add_handler(CommandHandler("stats", stats_command))
     application.add_handler(CommandHandler("leaderboard", leaderboard_command))
     application.add_handler(CommandHandler("setweight", setweight_command))
+    application.add_handler(CommandHandler("setup", setup_command))
+    application.add_handler(CommandHandler("syncadmins", syncadmins_command))
+    application.add_handler(CommandHandler("settopic", settopic_command))
+    application.add_handler(CommandHandler("cleartopic", cleartopic_command))
 
     # Add message handler for hashtag detection
     application.add_handler(

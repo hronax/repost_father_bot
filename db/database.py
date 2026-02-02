@@ -1,6 +1,7 @@
 from contextlib import asynccontextmanager
 from typing import AsyncGenerator
 
+from sqlalchemy import text
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
 
 from bot.config import get_config
@@ -45,9 +46,15 @@ async def get_session() -> AsyncGenerator[AsyncSession, None]:
 
 
 async def init_db():
+    """
+    Startup hook.
+
+    We intentionally do NOT auto-create tables here because production schema
+    should be managed via Alembic migrations.
+    """
     engine = get_async_engine()
-    async with engine.begin() as conn:
-        await conn.run_sync(Base.metadata.create_all)
+    async with engine.connect() as conn:
+        await conn.execute(text("SELECT 1"))
 
 
 async def close_db():
