@@ -56,20 +56,8 @@ async def get_user_by_username(session: AsyncSession, username: str) -> User | N
     return result.scalar_one_or_none()
 
 
-async def set_user_weight(session: AsyncSession, user: User, weight: float) -> None:
-    user.weight = weight
-    await session.flush()
-
-
 async def set_chat_user_weight(session: AsyncSession, chat_user: ChatUser, weight: float) -> None:
     chat_user.weight = weight
-    await session.flush()
-
-
-async def update_user_points(
-    session: AsyncSession, user: User, points_delta: float
-) -> None:
-    user.points += points_delta
     await session.flush()
 
 
